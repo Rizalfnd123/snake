@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game Ular-Ularan</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      background-color: #f3f3f3;
+    }
+    canvas {
+      display: block;
+      margin: 20px auto;
+      background-color: #000;
+    }
+    h1 {
+      color: #4CAF50;
+    }
+    p {
+      font-size: 18px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>Game Ular-Ularan</h1>
+  <p>Gunakan tombol panah untuk bermain. Makan makanan untuk menambah skor!</p>
+  <canvas id="gameCanvas" width="400" height="400"></canvas>
+  <p id="score">Skor: 0</p>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Ukuran grid dan posisi awal ular
+    const gridSize = 20;
+    let snake = [{ x: 200, y: 200 }];
+    let food = { x: gridSize * Math.floor(Math.random() * 20), y: gridSize * Math.floor(Math.random() * 20) };
+    let direction = { x: 0, y: 0 };
+    let score = 0;
+
+    function drawSnake() {
+      ctx.fillStyle = 'lime';
+      snake.forEach(segment => {
+        ctx.fillRect(segment.x, segment.y, gridSize, gridSize);
+      });
+    }
+
+    function drawFood() {
+      ctx.fillStyle = 'red';
+      ctx.fillRect(food.x, food.y, gridSize, gridSize);
+    }
+
+    function updateGame() {
+      // Hitung posisi baru untuk kepala ular
+      const newHead = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+
+      // Game over jika ular keluar batas atau menabrak dirinya sendiri
+      if (
+        newHead.x < 0 || newHead.x >= canvas.width ||
+        newHead.y < 0 || newHead.y >= canvas.height ||
+        snake.some(segment => segment.x === newHead.x && segment.y === newHead.y)
+      ) {
+        alert(`Game Over! Skor Anda: ${score}`);
+        document.location.reload();
+      }
+
+      // Tambahkan kepala baru ke ular
+      snake.unshift(newHead);
+
+      // Jika ular makan makanan, buat makanan baru dan tambah skor
+      if (newHead.x === food.x && newHead.y === food.y) {
+        score++;
+        document.getElementById('score').textContent = `Skor: ${score}`;
+        food = { x: gridSize * Math.floor(Math.random() * 20), y: gridSize * Math.floor(Math.random() * 20) };
+      } else {
+        // Jika tidak makan, hapus ekor ular
+        snake.pop();
+      }
+    }
+
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawSnake();
+      drawFood();
+      updateGame();
+    }
+
+    function changeDirection(event) {
+      const key = event.key;
+      if (key === 'ArrowUp' && direction.y === 0) direction = { x: 0, y: -gridSize };
+      if (key === 'ArrowDown' && direction.y === 0) direction = { x: 0, y: gridSize };
+      if (key === 'ArrowLeft' && direction.x === 0) direction = { x: -gridSize, y: 0 };
+      if (key === 'ArrowRight' && direction.x === 0) direction = { x: gridSize, y: 0 };
+    }
+
+    document.addEventListener('keydown', changeDirection);
+
+    // Jalankan game setiap 100 ms
+    setInterval(gameLoop, 100);
+  </script>
+</body>
+</html>
